@@ -1,0 +1,24 @@
+{
+  "name": "sql_parse_202403",
+  "version": "1.0.0",
+  "description": "SQLをパースして、配列にする",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "npm run lint && mochapack \"test/**/*.spec.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.3.12",
+    "@types/mocha": "^10.0.6",
+    "chai": "^5.1.0",
+    "eslint": "^8.57.0",
+    "mocha": "^10.3.0",
+    "mochapack": "^2.1.4"
+  }
+}

@@ -32,9 +32,8 @@
           "afterColon": true
         },
         "multiLine": {
-          "beforeColon": true,
-          "afterColon": true,
-          "align": "colon"
+          "beforeColon": false,
+          "afterColon": true
         }
       }
     ],

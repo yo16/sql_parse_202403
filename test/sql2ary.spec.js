@@ -56,7 +56,6 @@ const validateObj = (test, exp) => {
 describe("sql2ary", () => {
     describe("１つのテーブルから読んでSelectする場合", () => {
         const res = Sql2Ary("select t1.col1 from t1 where t1.col2=\"abc\"");
-        //console.log({res});
         const exp = [{
             tableName: "__top__",
             columns: [
@@ -75,4 +74,55 @@ describe("sql2ary", () => {
         
         validateElm(res, exp);
     });
+
+    describe("with句が１つある場合", () => {
+        const res = Sql2Ary(
+            "with t2 as (" +
+                "select " +
+                    "t1.id as id, name " +
+                "from t1" + 
+            ") select t2.col1 from t2, t3 where t2.id=t3.id"
+        );
+        const exp = [{
+            tableName: "__top__",
+            columns: [
+                {
+                    as: null,
+                    expr: {
+                        type: "column_ref",
+                        table: "t2",
+                        column: "col1",
+                    },
+                },
+            ],
+            fromTableNames: [
+                "t2",
+                "t3",
+            ],
+        },
+        {
+            tableName: "t2",
+            columns: [
+                {
+                    as: "id",
+                    expr: {
+                        type: "column_ref",
+                        table: "t1",
+                        column: "id",
+                    }
+                },
+                {
+                    as: null,
+                    expr: {
+                        type: "column_ref",
+                        table: null,
+                        column: "name",
+                    }
+                },
+            ]
+        }
+    ];
+        
+        validateElm(res, exp);
+    })
 });

@@ -2,7 +2,7 @@
   "name": "sql_parse_202403",
   "version": "1.0.0",
   "description": "SQLをパースして、配列にする",
-  "main": "index.js",
+  "main": "./src/index.js",
   "directories": {
     "test": "test"
   },
@@ -26,5 +26,8 @@
     "mochapack": "^2.1.4",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "node-sql-parser": "^4.18.0"
   }
 }

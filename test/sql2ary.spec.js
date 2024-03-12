@@ -9,66 +9,70 @@ const zip = (...arrays) => {
     return new Array(length).fill().map((_, i) => arrays.map(arr => arr[i]))
 }
 
-const validateTableElm = (res, exp) => {
-    // table
-    expect(res.length)
-        .to.equal(exp.length);
-    zip(res, exp).forEach(elm => {
-        const r = elm[0];
-        const e = elm[1];
-        expect(r).to.have.property("tableName");
-        expect(r).to.have.property("columns");
-        expect(r).to.have.property("fromTableNames");
-
-        // tableName
-        expect(r.tableName).to.equal(e.tableName);
-
-        // columns
-        expect(r.columns.length).to.equal(e.columns.length);
-        zip(r.columns, e.columns).forEach((elm1) => {
-            const rc = elm1[0];
-            const ec = elm1[1];
-            expect(rc).to.have.property("expr");
-            expect(rc.expr).to.have.property("type");
-            expect(rc.expr).to.have.property("table");
-            expect(rc.expr).to.have.property("column");
-            expect(rc.expr.type).to.equal(ec.expr.type);
-            expect(rc.expr.table).to.equal(ec.expr.table);
-            expect(rc.expr.column).to.equal(ec.expr.column);
+// 同一であることの確認
+// オブジェクトは完全一致でなく、expが持つkeyのvalueが一致することを確認する(他のkeyがある可能性がある)
+const validateElm = (test, exp) => {
+    if (exp == null) {
+        it("nullであること", () => {
+            expect(test).to.be.null;
+        })
+    } else if (Array.isArray(exp)) {
+        validateAry(test, exp);
+    } else if (typeof exp === "object") {
+        validateObj(test, exp);
+    } else {
+        // 単純比較
+        // 数値か文字列を想定
+        it("値が一致すること", () => {
+            expect(test).to.equal(exp);
         });
+    }
+    
+}
 
-        // fromTableNames
-        expect(r.fromTableNames.length).to.equal(e.fromTableNames.length);
-        zip(r.fromTableNames, e.fromTableNames).forEach(elm1 => {
-            const rt = elm1[0];
-            const et = elm1[1];
-            expect(rt).to.equal(et);
-        });
+const validateAry = (test, exp) => {
+    it("配列であること", () => {
+        expect(test).to.be.an.instanceOf(Array);
+    });
+    it("要素数が一致すること", () => {
+        expect(test.length).to.equal(exp.length);
+    });
+    // 各要素が一致すること
+    exp.forEach( (e, i) => {
+        validateElm(test[i], e);
     });
 }
 
+const validateObj = (test, exp) => {
+    // Keyの一致(expが持つキーを全部持っている)
+    it("Keyが一致すること", () => {
+        expect(test).to.include.all.keys(...Object.keys(exp));
+    });
+
+    // 値が一致
+    Object.keys(exp).map( k => validateElm(test[k], exp[k]));
+}
+
 describe("sql2ary", () => {
-    describe("main", () => {
-        it("sample test", () => {
-            const res = Sql2Ary("select t1.col1 from t1 where t1.col2=\"abc\"");
-            //console.log({res});
-            const exp = [{
-                tableName: "__top__",
-                columns: [
-                    {
-                        expr: {
-                            type: "column_ref",
-                            table: "t1",
-                            column: "col1",
-                        },
+    describe("１つのテーブルから読んでSelectする場合", () => {
+        const res = Sql2Ary("select t1.col1 from t1 where t1.col2=\"abc\"");
+        //console.log({res});
+        const exp = [{
+            tableName: "__top__",
+            columns: [
+                {
+                    expr: {
+                        type: "column_ref",
+                        table: "t1",
+                        column: "col1",
                     },
-                ],
-                fromTableNames: [
-                    "t1",
-                ],
-            },];
-            
-            validateTableElm(res, exp);
-        });
+                },
+            ],
+            fromTableNames: [
+                "t1",
+            ],
+        },];
+        
+        validateElm(res, exp);
     });
 });

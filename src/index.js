@@ -1,4 +1,4 @@
-import Sql2Ary from "./sql2ary";
+const Sql2Ary = require("./sql2ary");
 
 export {
     Sql2Ary,

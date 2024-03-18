@@ -1,6 +1,7 @@
 const { Parser } = require("node-sql-parser");
 
 const Stmt2Ary = require("./stmt2ary.js");
+const ConnectStmts = require("./connectStmts.js");
 
 const parser = new Parser();
 
@@ -17,13 +18,17 @@ const Sql2Ary = (query, database) => {
         console.error("Error");
         console.error("e.message");
     }
+    if (!stmt) {
+        return null;
+    }
 
     // array化
-    let retArray = [];
-    if (stmt) {
-        retArray = Stmt2Ary(stmt);
-    }
-    return retArray;
+    const stmtArray = Stmt2Ary(stmt);
+
+    // ConnectStmts
+    const stmtsObj = ConnectStmts(stmtArray);
+
+    return stmtsObj;
 };
 
 module.exports = {Sql2Ary};

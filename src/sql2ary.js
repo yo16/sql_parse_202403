@@ -1,7 +1,7 @@
 const { Parser } = require("node-sql-parser");
 
-const Stmt2Ary = require("./stmt2ary.js");
-const ConnectStmts = require("./connectStmts.js");
+const { Stmt2Ary } = require("./stmt2ary.js");
+const { ConnectStmts } = require("./connectStmts.js");
 
 const parser = new Parser();
 

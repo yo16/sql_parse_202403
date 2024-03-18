@@ -141,4 +141,4 @@ const getFormattedColumnObject = astCol => {
     };
 };
 
-module.exports = Stmt2Ary;
+module.exports = {Stmt2Ary};

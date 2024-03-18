@@ -5,7 +5,7 @@ const ConnectStmts = require("./connectStmts.js");
 
 const parser = new Parser();
 
-const Sql2Ary = (query, database) => {
+const Sql2Ary = (query, database = "BigQuery") => {
     // ast化(stmt化)
     let stmt = {};
     try {

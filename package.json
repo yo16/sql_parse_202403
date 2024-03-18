@@ -1,6 +1,6 @@
 {
   "name": "sql_parse_202403",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SQLをパースして、配列にする",
   "main": "./src/index.js",
   "directories": {

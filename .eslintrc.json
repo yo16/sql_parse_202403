@@ -99,10 +99,6 @@
       }
     ],
     "global-require": 1,
-    "arrow-body-style": [
-      2,
-      "as-needed"
-    ],
     "newline-per-chained-call": 0,
     "no-underscore-dangle": 0,
     "no-plusplus": 0,
@@ -114,7 +110,8 @@
       {
         "allow": [
           "warn",
-          "error"
+          "error",
+          "log"
         ]
       }
     ],

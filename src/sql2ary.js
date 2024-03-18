@@ -26,4 +26,4 @@ const Sql2Ary = (query, database) => {
     return retArray;
 };
 
-module.exports = Sql2Ary;
+module.exports = {Sql2Ary};

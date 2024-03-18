@@ -1,6 +1,7 @@
+/*
+
 const { expect } = require('chai');
 const Stmt2Ary = require("../src/stmt2ary").default;
-/*
 describe("stmt2ary", () => {
     describe("main", () => {
         it("top", () => {

@@ -12,8 +12,9 @@ const Sql2Ary = (query, database = "BigQuery") => {
         const opt = {
             database,
         };
-        const {ast, tableList, columnList} = parser.parse(query, opt);
-        stmt = {ast, tableList, columnList};
+        //const {ast, tableList, columnList} = parser.parse(query, opt);
+        const {ast} = parser.parse(query, opt);
+        stmt = {ast};
     } catch(e) {
         console.error("Error at Parser.parse().");
         console.error("e.message");
@@ -26,10 +27,14 @@ const Sql2Ary = (query, database = "BigQuery") => {
     // array化
     let stmtArray = null;
     try {
-        if (Array.isArray(stmt)) {
+        if (Array.isArray(stmt.ast)) {
             stmtArray = [];
-            stmt.forEach(s => {
-                const one_stmtArray = Stmt2Ary(s);
+            stmt.ast.forEach(oneAst => {
+                // stmtを作り直す
+                const oneStmt = {ast: oneAst};
+
+                // １つのstmtにした状態で呼び出す
+                const one_stmtArray = Stmt2Ary(oneStmt);
                 // 全部単純に結合する
                 // ★ todo: 同じテーブル名は、マージする？
                 // とりあえず１つのクエリのみを対象とする前提でおくが

@@ -3,8 +3,14 @@ const TOP_STMT_TABLE_NAME = "__top__";
 const Stmt2Ary = stmt => stmtParse({stmt});
 
 const stmtParse = ({name = null, stmt}) => {
+    // stmtが配列の場合は、エラーとする
+    if (Array.isArray(stmt.ast)) {
+        throw new Error("stmt shoud not Array!");
+    }
+
     const stmtParseFn = {
         "select": selectAst,
+        "insert": insertAst,
     };
 
     return stmtParseFn[stmt.ast.type](
@@ -58,6 +64,19 @@ const selectAst = (name, stmt) => {
         ...fromAry,
         ...withAry,
     ];
+};
+
+const insertAst = (name, stmt) => {
+    // insert selectにだけ対応
+    if (stmt.ast.values.type !== "select") {
+        throw new Error(`Unknown stmt.values.type (${stmt.values.type})`);
+    }
+
+    // nameをinsert先のテーブルにする
+    const tableName = stmt.ast.table[0].as ? stmt.ast.table[0].as : stmt.ast.table[0].table;
+
+    // stmtは、insert selectのselect部を設定
+    return selectAst({value: tableName}, {ast: stmt.ast.values});
 };
 
 // {table, column} の配列を返す

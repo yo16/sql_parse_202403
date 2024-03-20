@@ -8,4 +8,10 @@ describe("sample", () => {
             expect(a).to.equal(3);
         });
     });
+
+    describe("環境変数確認", () => {
+        it("テスト時は、NODE_ENV === development", () => {
+            expect(process.env.NODE_ENV).to.equal("development");
+        });
+    });
 });

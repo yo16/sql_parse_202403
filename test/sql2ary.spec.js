@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const Sql2Ary = require("../src/sql2ary").default;
+const { Sql2Ary } = require("../src/sql2ary");
 //import expect from "chai";
 //import Sql2Ary from "../src/sql2ary";
 
@@ -12,7 +12,7 @@ const zip = (...arrays) => {
 // 同一であることの確認
 // オブジェクトは完全一致でなく、expが持つkeyのvalueが一致することを確認する(他のkeyがある可能性がある)
 const validateElm = (test, exp) => {
-    if (exp == null) {
+    if (exp === null) {
         it("nullであること", () => {
             expect(test).to.be.null;
         })
@@ -44,33 +44,70 @@ const validateAry = (test, exp) => {
 }
 
 const validateObj = (test, exp) => {
+    it("Objectであること", () => {
+        expect(typeof test).to.equal("object");
+    });
+
     // Keyの一致(expが持つキーを全部持っている)
     it("Keyが一致すること", () => {
         expect(test).to.include.all.keys(...Object.keys(exp));
     });
 
     // 値が一致
-    Object.keys(exp).map( k => validateElm(test[k], exp[k]));
+    Object.keys(exp).map( k => {
+        validateElm(test[k], exp[k]);
+    });
+    //Object.keys(exp).map( k => console.log("dummy"));
 }
 
 describe("sql2ary", () => {
     describe("１つのテーブルから読んでSelectする場合", () => {
         const res = Sql2Ary("select t1.col1 from t1 where t1.col2=\"abc\"");
-        const exp = [{
-            tableName: "__top__",
-            columns: [
+        const exp = {
+            stmts: [
                 {
-                    expr: {
-                        type: "column_ref",
-                        table: "t1",
-                        column: "col1",
-                    },
+                    tableName: "__top__",
+                    columns: [
+                        {
+                            columnName: "col1",
+                            fromColumns: [
+                                {
+                                    tableName: "t1",
+                                    columnName: "col1",
+                                }
+                            ],
+                        },
+                    ],
+                    fromTableNames: [
+                        "t1",
+                    ],
+                    depth: 0,
+                },
+                {
+                    tableName: "t1",
+                    columns: [
+                        {
+                            columnName: "col1",
+                        }
+                    ],
+                    depth: 1,
+                }
+            ],
+            tableConns: [
+                {
+                    fromTableName: "t1",
+                    toTableName: "__top__",
                 },
             ],
-            fromTableNames: [
-                "t1",
+            colConns: [
+                {
+                    fromTableName: "t1",
+                    fromColumnName: "col1",
+                    toTableName: "__top__",
+                    toColumnName: "col1",
+                },
             ],
-        },];
+        };
         
         validateElm(res, exp);
     });
@@ -83,46 +120,105 @@ describe("sql2ary", () => {
                 "from t1" + 
             ") select t2.col1 from t2, t3 where t2.id=t3.id"
         );
-        const exp = [{
-            tableName: "__top__",
-            columns: [
+        const exp = {
+            stmts: [
                 {
-                    as: null,
-                    expr: {
-                        type: "column_ref",
-                        table: "t2",
-                        column: "col1",
-                    },
+                    tableName: "__top__",
+                    columns: [
+                        {
+                            columnName: "col1",
+                            fromColumns: [
+                                {
+                                    tableName: "t2",
+                                    columnName: "col1",
+                                },
+                            ]
+                        },
+                    ],
+                    fromTableNames: [
+                        "t2",
+                        "t3",
+                    ],
+                    depth: 0,
+                },
+                {
+                    tableName: "t2",
+                    columns: [
+                        {
+                            columnName: "id",
+                            fromColumns: [
+                                {
+                                    tableName: "t1",
+                                    columnName: "id",
+                                },
+                            ],
+                        },
+                        {
+                            columnName: "name",
+                            fromColumns: [
+                                {
+                                    tableName: "t1",
+                                    columnName: "name",
+                                },
+                            ],
+                        },
+                    ],
+                    depth: 1
+                },
+                {
+                    tableName: "t3",
+                    columns: [],
+                    depth: 1,
+                },
+                {
+                    tableName: "t1",
+                    columns: [
+                        {
+                            columnName: "id",
+                        },
+                        {
+                            columnName: "name",
+                        },
+                    ],
+                    depth: 2,
                 },
             ],
-            fromTableNames: [
-                "t2",
-                "t3",
+            tableConns: [
+                {
+                    fromTableName: "t2",
+                    toTableName: "__top__",
+                },
+                {
+                    fromTableName: "t3",
+                    toTableName: "__top__",
+                },
+                {
+                    fromTableName: "t1",
+                    toTableName: "t2",
+                },
             ],
-        },
-        {
-            tableName: "t2",
-            columns: [
+            colConns: [
                 {
-                    as: "id",
-                    expr: {
-                        type: "column_ref",
-                        table: "t1",
-                        column: "id",
-                    }
+                    fromTableName: "t2",
+                    fromColumnName: "col1",
+                    toTableName: "__top__",
+                    toColumnName: "col1",
                 },
                 {
-                    as: null,
-                    expr: {
-                        type: "column_ref",
-                        table: null,
-                        column: "name",
-                    }
+                    fromTableName: "t1",
+                    fromColumnName: "id",
+                    toTableName: "t2",
+                    toColumnName: "id",
                 },
-            ]
-        }
-    ];
-        
+                {
+                    fromTableName: "t1",
+                    fromColumnName: "name",
+                    toTableName: "t2",
+                    toColumnName: "name",
+                },
+            ],
+        };
         validateElm(res, exp);
-    })
+    });
+
 });

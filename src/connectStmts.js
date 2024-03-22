@@ -3,8 +3,6 @@ sql2aryで作成された配列を読み
 それらのテーブル間、列間の関係性を構築する
 */
 
-const TOP_STMT_TABLE_NAME = "__top__";
-
 const ConnectStmts = stmts => {
    const main = stmts => {
       // テーブル参照の有向グラフ(1:fromTable、2:toTable。いずれもindex)
@@ -144,18 +142,15 @@ const ConnectStmts = stmts => {
    // 1. 順序(depth: トップが0で、元へさかのぼるほど増える)を追加する
    // 2. クエリがないテーブル(＝stmtsにない)を簡単に追加する
    const updateStatements = (stmts, graphTable) => {
-      // depthを取得
-      const getDepth = (sts, idx) => {
-         const curStmt = getStmt(sts, idx);
-         if (Object.prototype.hasOwnProperty.call(curStmt, "depth")) {
-            return curStmt.depth;
-         }
-         return -1;
-      };
       // depthを設定
-      const setDepth = (sts, idx, depth) => {
+      const setDepth = (sts, idx, depth, gt) => {
          const curSt = getStmt(sts, idx);
          curSt["depth"] = depth;
+
+         if (idx in gt) {
+            // 子要素を+1で設定
+            gt[idx].forEach( c_idx => setDepth(sts, c_idx, depth + 1, gt));
+         }
       };
       // stmtを取得、なければ作る
       const getStmt = (sts, idx) => {
@@ -183,32 +178,11 @@ const ConnectStmts = stmts => {
       // stmtsをdeep copy
       const updStmts = JSON.parse(JSON.stringify(stmts));
    
-      // トップのdepthを0に設定
+      // トップのdepthを0に設定するとともに、下位も設定
       const topStmt = updStmts.filter(s => s.isTopQuery === true)[0];
       const topTableIdx = mapTableName2Idx[topStmt.tableName];
-      setDepth(updStmts, topTableIdx, 0);
-   
-      graphTable.forEach((graph, toIdx) => {
-         graph.forEach(fromIdx => {
-            const toDepth = getDepth(updStmts, toIdx);
-            if (toDepth >= 0) {
-               // toに設定されている場合は、+1の値をfromへ設定
-               setDepth(updStmts, fromIdx, toDepth + 1);
-            } else {
-               // 設定されていない場合は、fromを見る
-               const fromDepth = getDepth(updStmts, fromIdx);
-               if (fromDepth >= 0) {
-                  // fromに設定されている場合は、-1の値をtoへ設定
-                  setDepth(updStmts, toIdx, fromDepth - 1);
-               } else {
-                  // どちらにも設定されていない場合は、0と1を設定
-                  setDepth(updStmts, fromIdx, 1);
-                  setDepth(updStmts, toIdx, 0);
-               }
-            }
-         });
-      });
-   
+      setDepth(updStmts, topTableIdx, 0, graphTable);
+
       return updStmts;
    };
 

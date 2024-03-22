@@ -184,7 +184,8 @@ const ConnectStmts = stmts => {
       const updStmts = JSON.parse(JSON.stringify(stmts));
    
       // トップのdepthを0に設定
-      const topTableIdx = mapTableName2Idx[TOP_STMT_TABLE_NAME];
+      const topStmt = updStmts.filter(s => s.isTopQuery === true)[0];
+      const topTableIdx = mapTableName2Idx[topStmt.tableName];
       setDepth(updStmts, topTableIdx, 0);
    
       graphTable.forEach((graph, toIdx) => {

@@ -16,10 +16,11 @@ const stmtParse = ({name = null, stmt}) => {
     return stmtParseFn[stmt.ast.type](
         name ? name : {value: TOP_STMT_TABLE_NAME},
         stmt,
+        true,   // isTopQuery
     );
 };
 
-const selectAst = (name, stmt) => {
+const selectAst = (name, stmt, isTopQuery = false) => {
     const tableName = name.value;
     const ast = stmt.ast;
     //const tableList = stmt.tableList;
@@ -60,13 +61,16 @@ const selectAst = (name, stmt) => {
             tableName,
             columns,
             fromTableNames,
+            isTopQuery,
         },
         ...fromAry,
         ...withAry,
     ];
 };
 
-const insertAst = (name, stmt) => {
+const insertAst = (name, stmt, isTopQuery = true) => {
+    // insertは、topQueryしかないはず
+    
     // insert selectにだけ対応
     if (stmt.ast.values.type !== "select") {
         throw new Error(`Unknown stmt.values.type (${stmt.values.type})`);
@@ -76,7 +80,7 @@ const insertAst = (name, stmt) => {
     const tableName = stmt.ast.table[0].as ? stmt.ast.table[0].as : stmt.ast.table[0].table;
 
     // stmtは、insert selectのselect部を設定
-    return selectAst({value: tableName}, {ast: stmt.ast.values});
+    return selectAst({value: tableName}, {ast: stmt.ast.values}, isTopQuery);
 };
 
 // {table, column} の配列を返す

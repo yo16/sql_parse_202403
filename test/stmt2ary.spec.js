@@ -76,4 +76,21 @@ describe("Stmt2Ary", () => {
             expect(ret.length).to.equal(1);
         });
     });
+
+    describe("from句でasでリネーム", () => {
+        const query = "select a.col1 from tableA as a";
+        const stmt = parser.parse(query, opt);
+        const ret = Stmt2Ary(stmt);
+
+        it("１件", () => {
+            expect(ret.length).to.equal(1);
+        });
+        it("col1の元テーブルがリネーム前のテーブル名", () => {
+            expect(ret[0].columns[0].fromColumns[0].tableName).to.equal("tableA");
+        });
+        it("fromテーブルがリネーム前のテーブル名", () => {
+            expect(ret[0].fromTableNames[0]).to.equal("tableA");
+        });
+
+    })
 });

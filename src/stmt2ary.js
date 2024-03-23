@@ -29,7 +29,7 @@ const selectAst = (name, stmt, isTopQuery = false) => {
     // columnsの複数の異なるタイプをここで吸収し、統一する
     const columns = ast.columns.map(c => getFormattedColumnObject(c));
 
-    const fromTableNames = ast.from.map(f => f.as ? f.as : f.table);
+    const fromTableNames = ast.from.map(f => f.table);
 
     // 列の元テーブルがnullの場合の補完
     columns.forEach(c => {
@@ -77,7 +77,7 @@ const insertAst = (name, stmt, isTopQuery = true) => {
     }
 
     // nameをinsert先のテーブルにする
-    const tableName = stmt.ast.table[0].as ? stmt.ast.table[0].as : stmt.ast.table[0].table;
+    const tableName = stmt.ast.table[0].table;
 
     // stmtは、insert selectのselect部を設定
     return selectAst({value: tableName}, {ast: stmt.ast.values}, isTopQuery);
